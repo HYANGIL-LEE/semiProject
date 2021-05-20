@@ -4,13 +4,24 @@ import Joi from 'joi';
 
 const { ObjectId } = mongoose.Types;
 
-export const checkObjectId = (ctx, next) => {
+export const getPostById = async (ctx, next) => {
     const { id } = ctx.params;
     if (!ObjectId.isValid(id)) {
         ctx.status = 400; //bad request
         return;
     }
-    return next();
+    try {
+        const post = await Post.findById(id);
+        //포스트가 존재하지 않을 때
+        if (!post) {
+            ctx.status = 404; // not found
+            return;
+        }
+        ctx.state.post = post;
+        return next();
+    } catch (e) {
+        ctx.throw(500, e);
+    }
 };
 
 //데이터생성
@@ -45,6 +56,7 @@ export const write = async ctx => {
         title,
         body,
         tags,
+        user: ctx.state.user,
     });
     try {
         await post.save();
@@ -55,7 +67,7 @@ export const write = async ctx => {
 };
 //데이터조회
 /*
-GET /api/posts
+GET /api/posts?username=&tag=&page=
 */
 export const list = async ctx => {
     //query는 문자열이기에 숫자로 변환해줘야댐. 값이 주어지지 않았다면 1을 기본으로 사용
@@ -65,6 +77,14 @@ export const list = async ctx => {
         ctx.status = 400;
         return;
     }
+
+    const { tag, username } = ctx.query;
+    //tag, username값이 유효하면 객체안에 넣고, 그렇지 않으면 넣지않음
+    const query = {
+        ...(username ? { 'user.username': username } : {}),
+        ...(tag ? { tags: tag } : {}),
+    };
+
     try {
         const posts = await Post.find()
             .sort({ _id: -1 })
@@ -88,18 +108,8 @@ export const list = async ctx => {
 /*
 GET /api/posts/:id
 */
-export const read = async ctx => {
-    const { id } = ctx.params;
-    try {
-        const post = await Post.findById(id).exec();
-        if (!post) {
-            ctx.status = 404; //not found
-            return;
-        }
-        ctx.body = post;
-    } catch (e) {
-        ctx.throw(500, e);
-    }
+export const read = ctx => {
+    ctx.body = ctx.state.post;
 };
 
 //데이터삭제
@@ -155,5 +165,15 @@ export const update = async ctx => {
     } catch (e) {
         ctx.throw(500, e);
     }
+};
+
+// checkOwnPost 미들웨어
+export const checkOwnPost = (ctx, next) => {
+    const { user, post } = ctx.state;
+    if (post.user._id.toString() !== user._id) {
+        ctx.status = 403;
+        return;
+    }
+    return next();
 };
 
