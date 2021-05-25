@@ -27,7 +27,7 @@ const PostContent = styled.div`
     color: ${palette.gray[8]};
 `;
 
-const PostViewer = ({ post, error, loading }) => {
+const PostViewer = ({ post, error, loading, actionButtons }) => {
     //에러발생시
     if (error) {
         if (error.responst && error.response.status === 404) {
@@ -52,6 +52,7 @@ const PostViewer = ({ post, error, loading }) => {
                     hasMarginTop />
                 <Tags tags={tags} />
             </PostHead>
+            {actionButtons}
             <PostContent dangerouslySetInnerHTML={{ __html: body }}
             />
         </PostViewerBlock>
