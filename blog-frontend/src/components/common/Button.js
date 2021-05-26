@@ -24,10 +24,10 @@ const buttonStyle = css`
         width: 100%;
         font-size: 1.125rem;
     `}
-    ${props => props.cyan && css`
-        background: ${palette.cyan[5]};
+    ${props => props.purple && css`
+        background: ${palette.purple[9]};
         &:hover{
-            background: ${palette.cyan[4]};
+            background: ${palette.purple[6]};
         }
     `}
 
@@ -49,7 +49,7 @@ const StyledLink = styled(Link)`
 
 const Button = props => {
     return props.to ? (
-        <StyledLink {...props} cyan={props.cyan ? 1 : 0} />
+        <StyledLink {...props} purple={props.purple ? 1 : 0} />
     ) : (
         <StyledButton {...props} />
     );

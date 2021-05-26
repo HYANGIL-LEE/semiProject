@@ -53,7 +53,7 @@ const Header = ({ user, onLogout }) => {
                     <Link to="/" className="logo">I.M what I am</Link>
                     {user ? (
                         <div className="right">
-                            <UserInfo>{user.username}</UserInfo>
+                            <UserInfo>{user.username}님 안녕하세요🤙</UserInfo>
                             <Button onClick={onLogout}>로그아웃</Button>
                         </div>
                     ) : (
